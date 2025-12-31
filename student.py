@@ -69,7 +69,7 @@ def add_course():
     cursor = conn.cursor()
     cursor.execute("""
     INSERT INTO courses (course_name) VALUES(?)
-                   """,(course_name,))
+                   """,(course_name))
     conn.commit()
     conn.close()
     print("course added succesfully")
@@ -86,6 +86,18 @@ def show_course():
     for course in courses:
         print(f"ID: {course[0]}")
         print(f"Name: {course[1]}")
+        print(f"fee:{course[2]}")
+def update_course_fee():
+    course_name = input("Enter course name: ")
+    fee=int(input("Enter fee: "))
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute(
+    "UPDATE courses SET fee=? WHERE course_name=?",(fee,course_name))
+    conn.commit()
+    conn.close()
+    print("course fee updated")
+
 def enroll_students():
     student_id = int(input("Enter student ID to enroll: "))
     course_id = int(input("Enter course ID: "))
@@ -132,6 +144,58 @@ def show_enrollments():
     conn.close()
     for student_name, course_name in enrollments:
         print(f"{student_name}->{course_name}")
+def access_course():
+    student_id = int(input("Enter student ID: "))
+    course_id = int(input("Enter course ID: "))
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT fee_paid FROM enrollments
+    WHERE student_id=? AND course_id=?
+    """,(student_id,course_id))
+    result=cursor.fetchone()
+    conn.close()
+    if result is None:
+        print("student is not enrolled")
+    elif result[0]==1:
+        print("access to course")
+    else:
+        print("Access failed(pay the fees)")
+def show_course_access():
+    course_id = int(input("Enter course ID: "))
+
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT students.id, students.name
+    FROM enrollments
+    JOIN students ON enrollments.student_id = students.id
+    WHERE enrollments.course_id = ?
+    AND enrollments.fee_paid = 1
+    """, (course_id,))
+
+    students = cursor.fetchall()
+    conn.close()
+
+    if not students:
+        print("No students have access to this course")
+        return
+
+    print("Students who can access this course:")
+    for student in students:
+        print(f"ID: {student[0]}, Name: {student[1]}")
+def pay_fee():
+    student_id = int(input("Enter student ID: "))
+    course_id = int(input("Enter course ID: "))
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+    UPDATE enrollments SET fee_paid = 1
+    WHERE student_id=? AND course_id=?""",(student_id,course_id))
+    conn.commit()
+    conn.close()
+    print("payment succesfull")
 
 
 

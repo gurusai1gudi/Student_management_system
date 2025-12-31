@@ -46,3 +46,13 @@ def create_enrollment_table():
 
     conn.commit()
     conn.close()
+def alter_course():
+    conn=connect_db()
+    cursor=conn.cursor()
+    try:
+        cursor.execute("ALTER TABLE courses ADD COLUMN fee INTEGER NOT NULL")
+        conn.commit()
+        print("fee added")
+    except Exception as e:
+        print("exits")
+    conn.close()
