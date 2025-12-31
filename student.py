@@ -97,10 +97,20 @@ def enroll_students():
         print("student not found")
         conn.close()
         return
-    cursor.execute("SELECT id from courses WHERE course_id=?", (course_id,))
+    cursor.execute("SELECT id from courses WHERE id=?", (course_id,))
     course = cursor.fetchone()
     if course is None:
         print("course not found")
+        conn.close()
+        return
+    cursor.execute(
+        "SELECT id FROM enrollments WHERE student_id=? AND course_id=?",
+        (student_id, course_id)
+    )
+    existing = cursor.fetchone()
+
+    if existing is not None:
+        print("Student already enrolled in this course")
         conn.close()
         return
     cursor.execute("""
