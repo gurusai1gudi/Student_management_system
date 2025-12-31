@@ -91,6 +91,18 @@ def enroll_students():
     course_id = int(input("Enter course ID: "))
     conn = connect_db()
     cursor = conn.cursor()
+    cursor.execute("SELECT id from students WHERE id=?", (student_id,))
+    student = cursor.fetchone()
+    if student is None:
+        print("student not found")
+        conn.close()
+        return
+    cursor.execute("SELECT id from courses WHERE course_id=?", (course_id,))
+    course = cursor.fetchone()
+    if course is None:
+        print("course not found")
+        conn.close()
+        return
     cursor.execute("""
     INSERT INTO enrollments (
     student_id,course_id)VALUES(?,?)""",
